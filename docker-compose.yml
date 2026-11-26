@@ -1,0 +1,59 @@
+services:
+  users-api:
+    build: ./users-api
+    container_name: users-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - users-data:/data
+    networks:
+      - microservices
+
+  auth-api:
+    build: ./auth-api
+    container_name: auth-api
+    ports:
+      - "8001:8001"
+    environment:
+      USERS_API_URL: http://users-api:8000
+    volumes:
+      - auth-data:/data
+    networks:
+      - microservices
+    depends_on:
+      - users-api
+
+  orders-api:
+    build: ./orders-api
+    container_name: orders-api
+    ports:
+      - "8002:8002"
+    environment:
+      USERS_API_URL: http://users-api:8000
+      PRODUCTS_API_URL: http://products-api:8003
+    volumes:
+      - orders-data:/data
+    networks:
+      - microservices
+    depends_on:
+      - users-api
+      - products-api
+
+  products-api:
+    build: ./products-api
+    container_name: products-api
+    ports:
+      - "8003:8003"
+    volumes:
+      - products-data:/data
+    networks:
+      - microservices
+
+networks:
+  microservices:
+
+volumes:
+  users-data:
+  auth-data:
+  orders-data:
+  products-data:
